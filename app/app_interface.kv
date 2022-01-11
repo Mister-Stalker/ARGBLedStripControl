@@ -1,5 +1,6 @@
 #:import get_color_from_hex kivy.utils.get_color_from_hex
 
+
 <ModeButton>
     background_color: app.theme_cls.primary_color
 <ContentNavigationDrawer>
@@ -48,6 +49,9 @@ MDScreenMain:
         elevation: 10
         title: ""
         left_action_items: [["menu", lambda x: nav_drawer.set_state("open")]]
+        MDSwitch:
+            id: ip_switch
+            pos_hint: {'center_x': .5, 'center_y': .5}
 
     MDNavigationLayout:
         x: toolbar.height
@@ -136,7 +140,6 @@ MDScreenMain:
                             halign: "center"
                         MDSlider:
                             id: brightness_slider
-                            widget_style: "android"
                             min: 0
                             max: 100
                             value: 10

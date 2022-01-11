@@ -10,8 +10,7 @@ from kivymd.uix.screen import MDScreen
 from kivy.config import Config
 from kivymd.uix.button import MDIconButton
 Config.set('kivy', 'window_icon', 'icon.png')
-import asyncio
-import asynckivy as ak  # ADD TO SPEC FILE!!!!!
+
 
 
 class ArgbLedControl(MDApp):
@@ -28,7 +27,9 @@ class ArgbLedControl(MDApp):
 
 
 class MDScreenMain(MDScreen):
-
+    def __init__(self, *args, **kwargs):
+        super(MDScreenMain, self).__init__(*args, **kwargs)
+        self.brightnes = 10
     def load_config(self):
         self.board_configs = 0
         try:
@@ -55,23 +56,28 @@ class MDScreenMain(MDScreen):
 
     def set_brig(self, *arg):
         # print(self.ids.brightness_slider.value)
-        self.send_on_board(f"setbrig {int(self.ids.brightness_slider.value)}")
+        if self.ids.brightness_slider.value != self.brightnes:
+            self.send_on_board(f"setbrig {int(self.ids.brightness_slider.value)}")
+            self.brightnes = self.ids.brightness_slider.value
 
     def send_on_board(self, arg):
         try:
-            ak.start(self._send("command " + arg))
+            self._send("command " + arg)
         except Exception as e:
             # print("send error", e)
             self.ids.debug_label.text = str(e)
 
-    async def _send(self, arg):
+    def _send(self, arg):
         # print("start sleep")
         # await ak.sleep(5)
         # print("end sleep")
         mess = f'{arg}'
         print(mess)
-        server_address = ('192.168.0.123', 80)
-        # print('Подключено к {} порт {}'.format(*server_address))
+        if self.ids.ip_switch.active:
+            server_address = ('192.168.4.1', 80)
+        else:
+            server_address = ('192.168.0.123', 80)
+        print('Подключено к {} порт {}'.format(*server_address))
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         sock.connect(server_address)
         try:

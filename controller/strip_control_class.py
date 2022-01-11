@@ -158,10 +158,9 @@ class LedStrip(neopixel.NeoPixel):
         for i in range(1, self.leds):
             col = (col + x) % 1000
             self[i] = list(map(lambda x: int(x * self.temp["brightness"] / 100), self.hsv_to_rgb_fix_for_np(col/self.temp['2']["colors"], 1, 1)))
+            # print(self[i])
         self.write()
         # print(time.time_ns()-t, t2 - time.time())
-
-
         self.temp['2']["color"] += self.temp['2']["add on tick"]
         if self.temp['2']["color"] >= 1000:
             self.temp['2']["color"] = 0

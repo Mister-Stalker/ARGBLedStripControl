@@ -12,7 +12,7 @@
     "2": {
         "r": 1000,
         "colors": 1000,
-        "add on tick": 10
+        "add on tick": 5
     },
     "3": {
         "color": [255, 0, 0],

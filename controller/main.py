@@ -26,7 +26,7 @@ if button.value():
 
     gc.collect()
 
-    ssid = 'MicroPython-AP'
+    ssid = 'ArgbLedStripController'
     password = '123456789'
 
     ap = network.WLAN(network.AP_IF)
