@@ -155,7 +155,7 @@ class LedStrip(neopixel.NeoPixel):
         t2 = time.time()
         col = self.temp['2']["color"]
         x = self.temp['2']["r"]/self.leds
-        for i in range(1, self.leds):
+        for i in range(0, self.leds):
             col = (col + x) % 1000
             self[i] = list(map(lambda x: int(x * self.temp["brightness"] / 100), self.hsv_to_rgb_fix_for_np(col/self.temp['2']["colors"], 1, 1)))
             # print(self[i])

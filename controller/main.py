@@ -6,24 +6,34 @@ import socket
 import select
 import strip_control_class
 
+from time import sleep_ms, ticks_ms
+from machine import I2C, Pin
+from esp8266_i2c_lcd import I2cLcd
 
+
+# debug_lcd.putstr("It Works!\nSecond Line")
 configs = json.load(open("config.json"))
+strip = strip_control_class.LedStrip(pin=machine.Pin(configs["strip pin"]), leds=configs["leds"])
+strip.fill_all([0, 0, 0])
+
+
 print(configs)
 print(type(configs))
-
-
-strip = strip_control_class.LedStrip(pin=machine.Pin(4), leds=configs["leds"])
-
-
+if configs["debug"]:
+    try:
+        DEFAULT_I2C_ADDR = 0x27
+        i2c = I2C(scl=Pin(5), sda=Pin(4), freq=100000)
+        debug_lcd = I2cLcd(i2c, DEFAULT_I2C_ADDR, 2, 16)
+    except:
+        configs["debug"] = 0
 divider = 2
 button = machine.Pin(13, machine.Pin.IN)
 print("pin val", button.value())
 ##############################################
-
+is_ap = False
 
 if button.value():
     import gc
-
     gc.collect()
 
     ssid = 'ArgbLedStripController'
@@ -32,7 +42,9 @@ if button.value():
     ap = network.WLAN(network.AP_IF)
     ap.active(True)
     ap.config(essid=ssid, password=password)
-
+    if configs["debug"]:
+        debug_lcd.putstr("ap connect")
+    time.sleep(1)
     while not ap.active():
         print(".", end="")
         pass
@@ -40,8 +52,10 @@ if button.value():
     print('Connection successful')
     print(ap.ifconfig())
     sta_if = ap
+    is_ap = True
 
 else:
+
     sta_if = network.WLAN(network.STA_IF)
     # sta_if = network.WLAN(network.AP_IF)
     print('connecting to network...')
@@ -52,8 +66,13 @@ else:
         i = 0
         while (not sta_if.isconnected()) and i < configs["leds"]:
             strip.set_led([255, 0, 0], i)
+            if configs["debug"] and not i % (configs['leds']//16):
+                debug_lcd.putstr(".")
+
             i += 1
             time.sleep(10/configs["leds"])
+        if configs["debug"]:
+            debug_lcd.clear()
         if sta_if.isconnected():
             break
         else:
@@ -174,9 +193,19 @@ def handle_http(client, client_addr):
     else:
         client.send("no")
         client.close()
+    if configs["debug"]:
+        debug_lcd.clear()
+        debug_lcd.move_to(0, 0)
+        debug_lcd.putstr(sta_if.ifconfig()[0]+" "+str(strip.temp['current mode']))
+
+
 
 
 def serv(port=80):
+    if configs["debug"]:
+        debug_lcd.clear()
+        debug_lcd.move_to(0, 0)
+        debug_lcd.putstr(sta_if.ifconfig()[0]+" "+str(strip.temp['current mode']))
     http = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     addr = (socket.getaddrinfo("0.0.0.0", port))[0][-1]
     http.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -194,11 +223,12 @@ def serv(port=80):
         if tics >= divider:
             tics = 0
             strip.run()
+
     # a cюда можно вставить обработку еще-чего-то
     # а можно вставить такую обработку по таймеру
 
 
-if sta_if.isconnected():
+if sta_if.isconnected() or is_ap:
     serv()
 else:
     while True:
