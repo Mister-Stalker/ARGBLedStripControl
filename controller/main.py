@@ -107,7 +107,7 @@ else:
 
 def handle_http(client, client_addr):
     print("handle_http")
-    data = str(client.recv(1024), "utf-8").split()
+    data = str(client.recv(4096), "utf-8").split()
     print("received", data)
     if len(data) < 2:
         client.send("not correct command")
