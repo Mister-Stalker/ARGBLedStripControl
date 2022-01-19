@@ -188,6 +188,25 @@ def handle_http(client, client_addr):
                 client.send("error")
             finally:
                 client.close()
+        elif data[1] == "get_led_json":
+            try:
+                client.send(json.dumps(json.load(open("led_config.json"))))
+            except Exception as e:
+                print(e)
+                client.send("error")
+            finally:
+                client.close()
+        elif data[1] == "set_led_json":
+            try:
+                js = json.loads(" ".join(data[2:]))
+                print(js, type(js))
+                json.dump(js, open('led_config.json', "w"))
+                client.send("Done")
+            except Exception as e:
+                print(e)
+                client.send("error")
+            finally:
+                client.close()
 
 
     else:
