@@ -50,7 +50,14 @@ class LedStrip(neopixel.NeoPixel):
             21: self._effect_21,
         }
         self._load_temp()
-
+    def soft_reboot(self):
+        data = json.load(open("led_configs.json")
+        self.temp['1']["add on tick"] = data['1']["add on tick"]
+        self.temp['2']["add on tick"] = data['2']["add on tick"]
+        self.temp['2']["r"] = data['2']["r"]
+        self.temp['2']["colors"] = data['2']["colors"]
+        self.temp['10']["colors"] =  data['10']["colors"]
+        
     def _load_temp(self):
         data = json.load(open("led_configs.json"))
 
